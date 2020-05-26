@@ -31,9 +31,9 @@ class ArticleListView(BaseView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ArticleView(APIView):
-    
-    def get(self, request):
+class ArticleView(BaseView):
+
+    def get(self, request, article_id):
         article = self.get_object(Article, article_id)
         serializer = ArticleSerializer(article)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -50,6 +50,7 @@ class ArticleView(APIView):
         article = self.get_object(Article, article_id)
         article.upvotes += 1
         article.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
         
     def delete(self, request, article_id):
         article = self.get_object(Article, article_id)
@@ -75,10 +76,10 @@ class CommentListView(BaseView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommentView(APIView):
+class CommentView(BaseView):
 
     def put(self, request, article_id, comment_id, format=None):
-        comment = Comment.objects.get(id=comment_id)
+        comment = self.get_object(Comment, comment_id)
 
         serializer = CommentUpdateSerializer(comment, data=request.data)
         if serializer.is_valid():
